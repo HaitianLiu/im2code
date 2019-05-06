@@ -1,0 +1,1 @@
+python train.py --phase train --data_root data --batch_size 20 --beam_size 5 --num_epochs 10 --max_image_width 300 --max_image_height 200

@@ -11,8 +11,8 @@ class BaseOptions():
         self.initialized = False
 
     def initialize(self):
-        self.parser.add_argument('--data_root', required=True, help='path to images (should have subfolders trainA, trainB, valA, valB, etc)')
-        self.parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
+        self.parser.add_argument('--data_root', required=True, help='data root directory')
+        # self.parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
         self.parser.add_argument('--input_nc', type=int, default=3, help='# of input image channels')
         self.parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
         self.parser.add_argument('--name', type=str, default='experiment_name', help='name of the experiment. It decides where to store samples and models')
@@ -42,7 +42,7 @@ class BaseOptions():
         self.parser.add_argument('--val_data_path', type=str, default='data/validate.lst', help='The path containing validate data file names and labels. Format per line: image_path characters')
         self.parser.add_argument('--test_data_path', type=str, default='data/test_shuffle.lst', help='The path containing validate data file names and labels. Format per line: image_path characters')
         self.parser.add_argument('--label_path', type=str, default='data/XMLsequence.lst', help='The path containing data file names and labels. Format per line: image_path characters')
-        self.parser.add_argument('--vocab_path', type=str, default='data/xml_vocab.txt', help='Vocabulary file. A token per line.')
+        self.parser.add_argument('--vocab_path', type=str, default='vocabulary.vocab', help='Vocabulary file. A token per line.')
         self.parser.add_argument('--model_dir', type=str, default='model', help='The directory for saving and loading model parameters (structure is not stored)')
         self.parser.add_argument('--beam_size', type=int, default=5, help='beam search size when validation')
         self.initialized = True

@@ -6,6 +6,7 @@ from torch.nn.utils import clip_grad_norm
 import torch.nn as nn
 import os
 
+import sys
 
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
@@ -58,16 +59,26 @@ def mkdir(path):
         os.makedirs(path)
 
 
+# def get_vocab(opt):
+#     vocab = dict()
+#     vocab['<pad>'] = 0
+#     vocab['<s>'] = 1
+#     vocab['</s>'] = 2
+#     vocab['<unk>'] = 3
+
+#     with open(opt.vocab_path, encoding='utf8') as f:
+#         for index, line in enumerate(f.readlines()):
+#             vocab[line.strip()] = index+4
+#     return vocab
+
 def get_vocab(opt):
     vocab = dict()
-    vocab['<pad>'] = 0
-    vocab['<s>'] = 1
-    vocab['</s>'] = 2
-    vocab['<unk>'] = 3
-
-    with open(opt.vocab_path, encoding='utf8') as f:
-        for index, line in enumerate(f.readlines()):
-            vocab[line.strip()] = index+4
+    vocab['<unk>'] = 0
+    file = open(opt.vocab_path, 'r')
+    text = file.read().splitlines()[0]
+    file.close()
+    for index, word in enumerate(text.split()):
+        vocab[word] = index+1
     return vocab
 
 def get_rev_vocab(opt):
@@ -93,10 +104,9 @@ def get_images(opt, phase):
     return images
 
 
-def get_labels(opt):
-    with open(opt.label_path) as f:
-        return [f.split() for f in f.readlines()]
-   
+# def get_labels(opt):
+#     with open(opt.label_path) as f:
+#         return [f.split() for f in f.readlines()]
 
 def to_contiguous(tensor):
     if tensor.is_contiguous():
@@ -134,3 +144,17 @@ def clip_norm_gradient(optimizer, grad_clip):
 def set_lr(optimizer, lr):
     for group in optimizer.param_groups:
         group['lr'] = lr
+
+def get_ids_and_labels(opt, phase='train'):
+    ids = []
+    labels = {}
+    for f in os.listdir(os.path.join(opt.data_root, phase)):
+        if f.find('.gui') != -1:
+            ids.append(f[:-4])
+            label = []
+            file = open(os.path.join(opt.data_root, phase, f), 'r')
+            label = file.read()
+            file.close()
+            label = label.replace(',', ' ,').split()
+            labels[ids[-1]] = label
+    return ids, labels

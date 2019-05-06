@@ -6,18 +6,20 @@ import pickle
 import numpy as np
 from PIL import Image
 
-from util.util import get_vocab, get_images, get_labels
+from util.util import get_vocab, get_ids_and_labels
 
+import sys
 
 class UI2codeDataset(data.Dataset):
     def __init__(self, opt, phase):
         self.opt = opt
+        self.ids, self.labels = get_ids_and_labels(opt, phase)
         self.root = opt.data_root
-        self.image_paths = get_images(opt, phase)
-        self.ids = list(self.image_paths.keys())
-        print('#image: ', len(self.image_paths))
+        # self.image_paths = get_images(opt, phase)
+        # self.ids = list(self.image_paths.keys())
+        self.phase = phase
+        print(phase + '#image: ', len(self.ids))
         self.vocab = get_vocab(opt)
-        self.labels = get_labels(opt)
         # self.transform = transforms.Compose([transforms.ToTensor(),
         #     transforms.Normalize([0.2731853791024895], [0.24186649347904463])])
         self.transform = transforms.ToTensor()
@@ -26,14 +28,14 @@ class UI2codeDataset(data.Dataset):
         return self
     
     def __getitem__(self, index):
-        image_path = self.image_paths[self.ids[index]]
+        image_name = self.ids[index] + '.png'
         label = self.labels[self.ids[index]]
-        image = Image.open(os.path.join(self.root, 'processedImage', image_path)).convert('L')
+        image = Image.open(os.path.join(self.root, self.phase ,image_name))
         if self.transform is not None:
             image = self.transform(image)
-        skeleton = [self.vocab['<s>']]
-        skeleton.extend([self.vocab[t] if t in self.vocab else self.vocab['<unk>'] for t in label])
-        skeleton.append(self.vocab['</s>'])
+        skeleton = [self.vocab['<START>']]
+        skeleton.extend([self.vocab[word] if word in self.vocab else self.vocab['<unk>'] for word in label])
+        skeleton.append(self.vocab['<END>'])
         target = torch.Tensor(skeleton)
         return image, target
 
@@ -41,7 +43,7 @@ class UI2codeDataset(data.Dataset):
         return self.vocab
 
     def __len__(self):
-        return len(self.image_paths)
+        return len(self.ids)
 
 def collate_fn(data):
     """Creates mini-batch tensors from the list of tuples (image, caption).
@@ -92,4 +94,7 @@ class UI2codeDataloader():
     def __iter__(self):
         for i, data in enumerate(self.dataloader):
             yield data
+    
+    def __len__(self):
+        return len(self.dataset)
 
