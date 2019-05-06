@@ -16,7 +16,7 @@ class EncoderCNN(nn.Module):
     def __init__(self, opt):
         super(EncoderCNN, self).__init__()
         model = [
-            conv3x3(1, 64),
+            conv3x3(4, 64),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2, padding=0, ceil_mode=False),
             conv3x3(64, 128),

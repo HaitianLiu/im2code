@@ -81,9 +81,9 @@ def train(opt):
             loss.backward()
             clip_grad_norm(params, opt.norm_grad_clip)
             optimizer.step()
-            train_loss = loss.data[0]
+            train_loss = loss.item()
             pbar.set_description('Loss: %.4f'
-                                 % (loss.data[0]))
+                                 % (loss.item()))
             pbar.refresh()
             if total_steps % opt.print_freq == 0:
                 # print('Epoch [%d/%d], Step [%d/%d], Loss: %.4f'
