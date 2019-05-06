@@ -22,6 +22,8 @@ except ImportError:
     print("Tensorflow not installed; No tensorboard logging.")
     tf = None
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 def add_summary_value(writer, key, value, iteration):
     summary = tf.Summary(value=[tf.Summary.Value(tag=key, simple_value=value)])
     writer.add_summary(summary, iteration)
@@ -42,13 +44,13 @@ def train(opt):
 
     # model = create_model(opt)
     # visualizer = Visualizer(opt)
-    encoderCNN = EncoderCNN(opt)
-    encoderRNN = EncoderRNN(opt)
-    decoder = AttentionDecoder(opt)
-    if torch.cuda.is_available():
-        encoderCNN.cuda()
-        encoderRNN.cuda()
-        decoder.cuda()
+    encoderCNN = EncoderCNN(opt).to(device)
+    encoderRNN = EncoderRNN(opt).to(device)
+    decoder = AttentionDecoder(opt).to(device)
+    # if torch.cuda.is_available():
+    #     encoderCNN.cuda()
+    #     encoderRNN.cuda()
+    #     decoder.cuda()
 
     criterion = utils.LanguageModelCriterion()
     params = list(decoder.parameters()) + \
@@ -69,9 +71,9 @@ def train(opt):
         for (images, captions, masks) in pbar:
             iter_start_time = time.time()
             total_steps += opt.batch_size
-            images = Variable(images, requires_grad=False).cuda()
-            captions = Variable(captions, requires_grad=False).cuda()
-            masks = Variable(masks, requires_grad=False).cuda()
+            images = Variable(images, requires_grad=False).to(device)
+            captions = Variable(captions, requires_grad=False).to(device)
+            masks = Variable(masks, requires_grad=False).to(device)
             # targets = pack_padded_sequence(captions, lengths, batch_first=True)[0]
             features = encoderCNN(images)
             encoded_features = encoderRNN(features)
@@ -105,9 +107,9 @@ def train(opt):
         print('the end of epoch %d, iters %d' % (epoch, total_steps))
         val_accuracy = []
         for (images, captions, masks) in val_data_loader:
-            images = Variable(images, requires_grad=False).cuda()
-            captions = Variable(captions, requires_grad=False).cuda()
-            masks = Variable(masks, requires_grad=False).cuda()
+            images = Variable(images, requires_grad=False).to(device)
+            captions = Variable(captions, requires_grad=False).to(device)
+            masks = Variable(masks, requires_grad=False).to(device)
             # targets = pack_padded_sequence(captions, lengths, batch_first=True)[0]
             features = encoderCNN(images)
             encoded_features = encoderRNN(features)

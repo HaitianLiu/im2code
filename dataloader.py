@@ -30,7 +30,7 @@ class UI2codeDataset(data.Dataset):
     def __getitem__(self, index):
         image_name = self.ids[index] + '.png'
         label = self.labels[self.ids[index]]
-        image = Image.open(os.path.join(self.root, self.phase ,image_name))
+        image = Image.open(os.path.join(self.root, self.phase ,image_name)).convert('RGB')
         if self.transform is not None:
             image = self.transform(image)
         skeleton = [self.vocab['<START>']]
