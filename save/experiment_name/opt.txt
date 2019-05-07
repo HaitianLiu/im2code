@@ -1,0 +1,62 @@
+------------ Options -------------
+batch_size: 20
+beam_size: 5
+bos: 1
+checkpoint_path: save
+closing_tag: }
+cnn_feature_size: 512
+continue_train: False
+data_root: data
+decoder_num_hidden: 512
+decoder_num_layers: 1
+dropout: 0.0
+encoder_num_hidden: 256
+encoder_num_layers: 1
+eos: 2
+epoch_count: 1
+expr_dir: save/experiment_name
+gpu_ids: [0]
+init_type: normal
+input_nc: 3
+isTrain: True
+label_path: data/XMLsequence.lst
+learning_rate: 0.1
+learning_rate_min: 1e-05
+lr_decay: 0.5
+lr_decay_iters: 50
+lr_policy: lambda
+max_dataset_size: inf
+max_decoder_l: 151
+max_encoder_l_h: 25
+max_encoder_l_w: 37
+max_image_height: 200
+max_image_width: 300
+max_num_tokens: 150
+model: translation
+model_dir: model
+nThreads: 2
+name: experiment_name
+niter: 100
+no_dropout: False
+norm: instance
+norm_grad_clip: 5
+num_epochs: 10
+opening_tag: {
+phase: train
+print_freq: 100
+rev_vocab: ['<pad>', '<s>', '</s>', '<unk>', ',', '{', '}', 'small-title', 'text', 'quadruple', 'row', 'btn-inactive', 'btn-orange', 'btn-green', 'btn-red', 'double', 'header', 'btn-active', 'single']
+save_epoch_freq: 5
+save_latest_freq: 5000
+serial_batches: False
+spatial: False
+start_decay_at: 999
+start_from: 
+target_embedding_size: 80
+target_vocab_size: 19
+test_data_path: data/test_shuffle.lst
+train_data_path: data/train.lst
+val_data_path: data/validate.lst
+vocab: {'<pad>': 0, '<s>': 1, '</s>': 2, '<unk>': 3, ',': 4, '{': 5, '}': 6, 'small-title': 7, 'text': 8, 'quadruple': 9, 'row': 10, 'btn-inactive': 11, 'btn-orange': 12, 'btn-green': 13, 'btn-red': 14, 'double': 15, 'header': 16, 'btn-active': 17, 'single': 18}
+vocab_path: vocabulary.vocab
+which_epoch: latest
+-------------- End ----------------
