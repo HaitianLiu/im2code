@@ -173,7 +173,7 @@ class AttentionDecoder(nn.Module):
         )
 
         beam = [
-            Beam(beam_size, self.vocab, cuda=True)
+            Beam(beam_size, self.vocab, cuda= torch.cuda.is_available())
             for k in range(batch_size)
         ]
 
@@ -186,7 +186,6 @@ class AttentionDecoder(nn.Module):
                                 [b.get_current_state()
                                  for b in beam if not b.done]
                                 ).t().contiguous().view(1, -1)
-
             trg_emb = self.embed(Variable(input).transpose(1, 0))
             trg_h, (trg_h_t, trg_c_t) = self.core(
                 trg_emb,
