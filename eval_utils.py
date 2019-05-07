@@ -79,5 +79,3 @@ def build_tree(seq):
 
 def tree_distance(r, t):
     return simple_distance(build_tree(r), build_tree(t))/len(t)
-
-
