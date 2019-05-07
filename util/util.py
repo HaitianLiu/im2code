@@ -73,12 +73,15 @@ def mkdir(path):
 
 def get_vocab(opt):
     vocab = dict()
-    vocab['<unk>'] = 0
+    vocab['<pad>'] = 0
+    vocab['<s>'] = 1
+    vocab['</s>'] = 2
+    vocab['<unk>'] = 3
     file = open(opt.vocab_path, 'r')
     text = file.read().splitlines()[0]
     file.close()
     for index, word in enumerate(text.split()):
-        vocab[word] = index+1
+        vocab[word] = index+4
     return vocab
 
 def get_rev_vocab(opt):

@@ -33,9 +33,9 @@ class UI2codeDataset(data.Dataset):
         image = Image.open(os.path.join(self.root, self.phase ,image_name)).convert('RGB')
         if self.transform is not None:
             image = self.transform(image)
-        skeleton = [self.vocab['<START>']]
+        skeleton = [self.vocab['<s>']]
         skeleton.extend([self.vocab[word] if word in self.vocab else self.vocab['<unk>'] for word in label])
-        skeleton.append(self.vocab['<END>'])
+        skeleton.append(self.vocab['</s>'])
         target = torch.Tensor(skeleton)
         return image, target
 
