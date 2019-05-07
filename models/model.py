@@ -7,6 +7,8 @@ from torch.autograd import Variable
 from torch.nn.utils.rnn import pack_padded_sequence
 from .BeamSearch import Beam
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 def conv3x3(in_planes, out_planes, stride=1):
     "3x3 convolution with padding"
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
@@ -72,7 +74,7 @@ class EncoderRNN(nn.Module):
         outputs = []
         for i in range(imgH): # imgSeq height
             pos = Variable(torch.LongTensor(
-                [i] * img_feats.size(0)).zero_(), requires_grad=False).cuda().contiguous()  # batch * (num_layer * 2) * hidden_dim
+                [i] * img_feats.size(0)).zero_(), requires_grad=False).to(device).contiguous()  # batch * (num_layer * 2) * hidden_dim
             # (num_layer * 2) * batch * hidden_dim
             pos_embedding = self.pos_embedding(
                 pos).view(-1, 2 * self.n_layers, self.encoder_num_hidden).transpose(0, 1).contiguous()
