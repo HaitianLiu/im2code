@@ -8,6 +8,8 @@ from torch.nn.utils.rnn import pack_padded_sequence
 from .BeamSearch import Beam
 from util.util import Sequence, TopN
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 def conv3x3(in_planes, out_planes, stride=1):
     "3x3 convolution with padding"
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
@@ -17,7 +19,7 @@ class EncoderCNN(nn.Module):
     def __init__(self, opt):
         super(EncoderCNN, self).__init__()
         model = [
-            conv3x3(1, 64),
+            conv3x3(3, 64),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2, padding=0, ceil_mode=False),
             conv3x3(64, 128),
@@ -110,7 +112,7 @@ class SpatialEncoderRNN(nn.Module):
         outputs_h = []
         for i in range(imgH): # imgSeq height
             pos = Variable(torch.LongTensor(
-                [i] * img_feats.size(0)).zero_(), requires_grad=False).cuda().contiguous()  # batch * (num_layer * 2) * hidden_dim
+                [i] * img_feats.size(0)).zero_(), requires_grad=False).to(device).contiguous()  # batch * (num_layer * 2) * hidden_dim
             # (num_layer * 2) * batch * hidden_dim
             pos_embedding = self.pos_embedding_w(
                 pos).view(-1, 2 * self.n_layers, self.encoder_num_hidden).transpose(0, 1).contiguous()
@@ -225,7 +227,7 @@ class AttentionDecoder(nn.Module):
         )
 
         beam = [
-            Beam(beam_size, self.vocab, cuda=True)
+            Beam(beam_size, self.vocab, cuda= torch.cuda.is_available())
             for k in range(batch_size)
         ]
 
@@ -238,7 +240,6 @@ class AttentionDecoder(nn.Module):
                                 [b.get_current_state()
                                  for b in beam if not b.done]
                                 ).t().contiguous().view(1, -1)
-
             trg_emb = self.embed(Variable(input).transpose(1, 0))
             trg_h, (trg_h_t, trg_c_t) = self.core(
                 trg_emb,

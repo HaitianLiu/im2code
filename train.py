@@ -22,6 +22,8 @@ except ImportError:
     print("Tensorflow not installed; No tensorboard logging.")
     tf = None
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 def add_summary_value(writer, key, value, iteration):
     summary = tf.Summary(value=[tf.Summary.Value(tag=key, simple_value=value)])
     writer.add_summary(summary, iteration)
@@ -37,12 +39,12 @@ def train(opt):
 
     # model = create_model(opt)
     # visualizer = Visualizer(opt)
-    encoderCNN = EncoderCNN(opt)
+    encoderCNN = EncoderCNN(opt).to(device)
     if opt.spatial:
-        encoderRNN = SpatialEncoderRNN(opt)
+        encoderRNN = SpatialEncoderRNN(opt).to(device)
     else:
-        encoderRNN = EncoderRNN(opt)
-    decoder = AttentionDecoder(opt)
+        encoderRNN = EncoderRNN(opt).to(device)
+    decoder = AttentionDecoder(opt).to(device)
     if opt.start_from:
         encoderCNN.load_state_dict(torch.load(os.path.join(
             opt.results_dir, 'encoder-cnn-%s.pkl' % (opt.model_name))))
@@ -50,10 +52,6 @@ def train(opt):
             opt.results_dir, 'encoder-rnn-%s.pkl' % (opt.model_name))))
         decoder.load_state_dict(torch.load(os.path.join(
             opt.results_dir, 'decoder-%s.pkl' % (opt.model_name))))
-    if torch.cuda.is_available():
-        encoderCNN.cuda()
-        encoderRNN.cuda()
-        decoder.cuda()
 
     criterion = utils.LanguageModelCriterion()
     params = list(decoder.parameters()) + \
@@ -75,9 +73,9 @@ def train(opt):
         for (images, captions, masks) in pbar:
             iter_start_time = time.time()
             total_steps += opt.batch_size
-            images = Variable(images, requires_grad=False).cuda()
-            captions = Variable(captions, requires_grad=False).cuda()
-            masks = Variable(masks, requires_grad=False).cuda()
+            images = Variable(images, requires_grad=False).to(device)
+            captions = Variable(captions, requires_grad=False).to(device)
+            masks = Variable(masks, requires_grad=False).to(device)
             # targets = pack_padded_sequence(captions, lengths, batch_first=True)[0]
             features = encoderCNN(images)
             encoded_features = encoderRNN(features)
@@ -87,9 +85,9 @@ def train(opt):
             loss.backward()
             clip_grad_norm(params, opt.norm_grad_clip)
             optimizer.step()
-            train_loss = loss.data[0]
+            train_loss = loss.item()
             pbar.set_description('Loss: %.4f'
-                                 % (loss.data[0]))
+                                 % (loss.item()))
             pbar.refresh()
             if total_steps % opt.print_freq == 0:
                 # print('Epoch [%d/%d], Step [%d/%d], Loss: %.4f'
@@ -111,9 +109,9 @@ def train(opt):
         print('the end of epoch %d, iters %d' % (epoch, total_steps))
         val_accuracy = []
         for (images, captions, masks) in val_data_loader:
-            images = Variable(images, requires_grad=False).cuda()
-            captions = Variable(captions, requires_grad=False).cuda()
-            masks = Variable(masks, requires_grad=False).cuda()
+            images = Variable(images, requires_grad=False).to(device)
+            captions = Variable(captions, requires_grad=False).to(device)
+            masks = Variable(masks, requires_grad=False).to(device)
             features = encoderCNN(images)
             encoded_features = encoderRNN(features)
             greedy_outputs = decoder.decode(encoded_features)
@@ -142,9 +140,6 @@ def train(opt):
         print('validation accuracy: %.4f\nBest validation accuracy: %.4f' %
               (cur_val_accuracy, best_val_accuracy))
 
-
-
-            
         torch.save(decoder.state_dict(),
                    os.path.join(opt.expr_dir,
                                 'decoder-%d.pkl' % (epoch + 1)))
